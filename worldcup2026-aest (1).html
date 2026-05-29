@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FIFA World Cup 2026 — AEST Schedule</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#070d09;color:#e2e8e4;}
+  ::-webkit-scrollbar{width:6px;}
+  ::-webkit-scrollbar-track{background:#0e1a12;}
+  ::-webkit-scrollbar-thumb{background:#1e4a28;border-radius:3px;}
+  .match-card{transition:transform .15s;}
+  .match-card:hover{transform:translateY(-1px);}
+  .filter-btn{transition:all .15s ease;cursor:pointer;border:none;}
+  input::placeholder{color:#3a5a40;}
+  input{color:#e2e8e4;outline:none;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo } = React;
+
+const MATCHES = [
+  // GROUP STAGE
+  {date:"Jun 12",time:"07:00",home:"Mexico",away:"South Africa",group:"A",stage:"Group",venue:"Mexico City"},
+  {date:"Jun 12",time:"14:00",home:"South Korea",away:"TBD",group:"A",stage:"Group",venue:"Guadalajara"},
+  {date:"Jun 13",time:"06:00",home:"Canada",away:"TBD",group:"B",stage:"Group",venue:"Toronto"},
+  {date:"Jun 13",time:"15:00",home:"USA",away:"Paraguay",group:"D",stage:"Group",venue:"Los Angeles"},
+  {date:"Jun 14",time:"09:00",home:"Qatar",away:"Switzerland",group:"B",stage:"Group",venue:"San Francisco"},
+  {date:"Jun 14",time:"09:00",home:"Brazil",away:"Morocco",group:"C",stage:"Group",venue:"New York/NJ"},
+  {date:"Jun 14",time:"12:00",home:"Haiti",away:"Scotland",group:"C",stage:"Group",venue:"Boston"},
+  {date:"Jun 14",time:"18:00",home:"Australia 🇦🇺",away:"TBD",group:"D",stage:"Group",venue:"Vancouver"},
+  {date:"Jun 15",time:"05:00",home:"Germany",away:"Curacao",group:"E",stage:"Group",venue:"Houston"},
+  {date:"Jun 15",time:"08:00",home:"Netherlands",away:"Japan",group:"F",stage:"Group",venue:"Dallas"},
+  {date:"Jun 15",time:"10:00",home:"Ivory Coast",away:"Ecuador",group:"E",stage:"Group",venue:"Philadelphia"},
+  {date:"Jun 15",time:"14:00",home:"TBD",away:"Tunisia",group:"F",stage:"Group",venue:"Monterrey"},
+  {date:"Jun 16",time:"03:00",home:"Spain",away:"Cape Verde",group:"H",stage:"Group",venue:"Atlanta"},
+  {date:"Jun 16",time:"09:00",home:"Belgium",away:"Egypt",group:"G",stage:"Group",venue:"Vancouver"},
+  {date:"Jun 16",time:"09:00",home:"Saudi Arabia",away:"Uruguay",group:"H",stage:"Group",venue:"Miami"},
+  {date:"Jun 16",time:"15:00",home:"Iran",away:"New Zealand",group:"G",stage:"Group",venue:"Los Angeles"},
+  {date:"Jun 17",time:"06:00",home:"France",away:"Senegal",group:"I",stage:"Group",venue:"New York/NJ"},
+  {date:"Jun 17",time:"09:00",home:"TBD",away:"Norway",group:"I",stage:"Group",venue:"Boston"},
+  {date:"Jun 17",time:"13:00",home:"Argentina 🇦🇷",away:"Algeria",group:"J",stage:"Group",venue:"Kansas City"},
+  {date:"Jun 17",time:"18:00",home:"Austria",away:"Jordan",group:"J",stage:"Group",venue:"San Francisco"},
+  {date:"Jun 18",time:"05:00",home:"Portugal",away:"TBD",group:"K",stage:"Group",venue:"Houston"},
+  {date:"Jun 18",time:"08:00",home:"England",away:"Croatia",group:"L",stage:"Group",venue:"Dallas"},
+  {date:"Jun 18",time:"10:00",home:"Ghana",away:"Panama",group:"L",stage:"Group",venue:"Toronto"},
+  {date:"Jun 18",time:"14:00",home:"Uzbekistan",away:"Colombia",group:"K",stage:"Group",venue:"Mexico City"},
+  {date:"Jun 19",time:"03:00",home:"TBD",away:"South Africa",group:"A",stage:"Group",venue:"Atlanta"},
+  {date:"Jun 19",time:"09:00",home:"Switzerland",away:"TBD",group:"B",stage:"Group",venue:"Los Angeles"},
+  {date:"Jun 19",time:"12:00",home:"Canada",away:"Qatar",group:"B",stage:"Group",venue:"Vancouver"},
+  {date:"Jun 19",time:"13:00",home:"Mexico",away:"South Korea",group:"A",stage:"Group",venue:"Guadalajara"},
+  {date:"Jun 20",time:"09:00",home:"Scotland",away:"Morocco",group:"C",stage:"Group",venue:"Boston"},
+  {date:"Jun 20",time:"09:00",home:"USA",away:"Australia 🇦🇺",group:"D",stage:"Group",venue:"Seattle"},
+  {date:"Jun 20",time:"12:00",home:"Brazil",away:"Haiti",group:"C",stage:"Group",venue:"Philadelphia"},
+  {date:"Jun 20",time:"18:00",home:"TBD",away:"Paraguay",group:"D",stage:"Group",venue:"San Francisco"},
+  {date:"Jun 21",time:"05:00",home:"Netherlands",away:"TBD",group:"F",stage:"Group",venue:"Houston"},
+  {date:"Jun 21",time:"07:00",home:"Germany",away:"Ivory Coast",group:"E",stage:"Group",venue:"Toronto"},
+  {date:"Jun 21",time:"14:00",home:"Ecuador",away:"Curacao",group:"E",stage:"Group",venue:"Kansas City"},
+  {date:"Jun 21",time:"16:00",home:"Tunisia",away:"Japan",group:"F",stage:"Group",venue:"Monterrey"},
+  {date:"Jun 22",time:"03:00",home:"Spain",away:"Saudi Arabia",group:"H",stage:"Group",venue:"Atlanta"},
+  {date:"Jun 22",time:"09:00",home:"Belgium",away:"Iran",group:"G",stage:"Group",venue:"Los Angeles"},
+  {date:"Jun 22",time:"09:00",home:"Uruguay",away:"Cape Verde",group:"H",stage:"Group",venue:"Miami"},
+  {date:"Jun 22",time:"15:00",home:"New Zealand",away:"Egypt",group:"G",stage:"Group",venue:"Vancouver"},
+  {date:"Jun 23",time:"05:00",home:"Argentina 🇦🇷",away:"Austria",group:"J",stage:"Group",venue:"Dallas"},
+  {date:"Jun 23",time:"08:00",home:"France",away:"TBD",group:"I",stage:"Group",venue:"Philadelphia"},
+  {date:"Jun 23",time:"11:00",home:"Norway",away:"Senegal",group:"I",stage:"Group",venue:"New York/NJ"},
+  {date:"Jun 23",time:"17:00",home:"Jordan",away:"Algeria",group:"J",stage:"Group",venue:"San Francisco"},
+  {date:"Jun 24",time:"05:00",home:"Portugal",away:"Uzbekistan",group:"K",stage:"Group",venue:"Houston"},
+  {date:"Jun 24",time:"07:00",home:"England",away:"Ghana",group:"L",stage:"Group",venue:"Boston"},
+  {date:"Jun 24",time:"10:00",home:"Panama",away:"Croatia",group:"L",stage:"Group",venue:"Toronto"},
+  {date:"Jun 24",time:"14:00",home:"Colombia",away:"TBD",group:"K",stage:"Group",venue:"Guadalajara"},
+  {date:"Jun 25",time:"09:00",home:"Switzerland",away:"Canada",group:"B",stage:"Group",venue:"Vancouver"},
+  {date:"Jun 25",time:"09:00",home:"TBD",away:"Qatar",group:"B",stage:"Group",venue:"Seattle"},
+  {date:"Jun 25",time:"09:00",home:"Scotland",away:"Brazil",group:"C",stage:"Group",venue:"Miami"},
+  {date:"Jun 25",time:"09:00",home:"Morocco",away:"Haiti",group:"C",stage:"Group",venue:"Atlanta"},
+  {date:"Jun 25",time:"13:00",home:"TBD",away:"Mexico",group:"A",stage:"Group",venue:"Mexico City"},
+  {date:"Jun 25",time:"13:00",home:"South Africa",away:"South Korea",group:"A",stage:"Group",venue:"Monterrey"},
+  {date:"Jun 26",time:"07:00",home:"Ecuador",away:"Germany",group:"E",stage:"Group",venue:"New York/NJ"},
+  {date:"Jun 26",time:"07:00",home:"Curacao",away:"Ivory Coast",group:"E",stage:"Group",venue:"Philadelphia"},
+  {date:"Jun 26",time:"11:00",home:"Japan",away:"TBD",group:"F",stage:"Group",venue:"Dallas"},
+  {date:"Jun 26",time:"11:00",home:"Tunisia",away:"Netherlands",group:"F",stage:"Group",venue:"Kansas City"},
+  {date:"Jun 26",time:"16:00",home:"TBD",away:"USA",group:"D",stage:"Group",venue:"Los Angeles"},
+  {date:"Jun 26",time:"16:00",home:"Paraguay",away:"Australia 🇦🇺",group:"D",stage:"Group",venue:"San Francisco"},
+  {date:"Jun 27",time:"06:00",home:"Norway",away:"France",group:"I",stage:"Group",venue:"Boston"},
+  {date:"Jun 27",time:"06:00",home:"Senegal",away:"TBD",group:"I",stage:"Group",venue:"Toronto"},
+  {date:"Jun 27",time:"12:00",home:"Cape Verde",away:"Saudi Arabia",group:"H",stage:"Group",venue:"Houston"},
+  {date:"Jun 27",time:"12:00",home:"Uruguay",away:"Spain",group:"H",stage:"Group",venue:"Guadalajara"},
+  {date:"Jun 27",time:"17:00",home:"Egypt",away:"Iran",group:"G",stage:"Group",venue:"Seattle"},
+  {date:"Jun 27",time:"17:00",home:"New Zealand",away:"Belgium",group:"G",stage:"Group",venue:"Vancouver"},
+  {date:"Jun 28",time:"08:00",home:"Panama",away:"England",group:"L",stage:"Group",venue:"New York/NJ"},
+  {date:"Jun 28",time:"08:00",home:"Croatia",away:"Ghana",group:"L",stage:"Group",venue:"Philadelphia"},
+  {date:"Jun 28",time:"12:30",home:"Colombia",away:"Portugal",group:"K",stage:"Group",venue:"Miami"},
+  {date:"Jun 28",time:"12:30",home:"TBD",away:"Uzbekistan",group:"K",stage:"Group",venue:"Atlanta"},
+  {date:"Jun 28",time:"14:00",home:"Algeria",away:"Austria",group:"J",stage:"Group",venue:"Kansas City"},
+  {date:"Jun 28",time:"14:00",home:"Jordan",away:"Argentina 🇦🇷",group:"J",stage:"Group",venue:"Dallas"},
+  // ROUND OF 32
+  {date:"Jun 29",time:"09:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Los Angeles"},
+  {date:"Jun 30",time:"05:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Houston"},
+  {date:"Jun 30",time:"08:30",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Boston"},
+  {date:"Jun 30",time:"13:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Monterrey"},
+  {date:"Jul 1",time:"05:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Dallas"},
+  {date:"Jul 1",time:"08:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"New York/NJ"},
+  {date:"Jul 1",time:"13:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Mexico City"},
+  {date:"Jul 2",time:"03:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Atlanta"},
+  {date:"Jul 2",time:"10:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Seattle"},
+  {date:"Jul 2",time:"14:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"San Francisco"},
+  {date:"Jul 3",time:"09:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Los Angeles"},
+  {date:"Jul 3",time:"10:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Toronto"},
+  {date:"Jul 3",time:"17:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Vancouver"},
+  {date:"Jul 4",time:"07:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Dallas"},
+  {date:"Jul 4",time:"09:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Miami"},
+  {date:"Jul 4",time:"13:30",home:"TBD",away:"TBD",group:"-",stage:"Round of 32",venue:"Kansas City"},
+  // ROUND OF 16
+  {date:"Jul 5",time:"05:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 16",venue:"Houston"},
+  {date:"Jul 5",time:"08:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 16",venue:"Philadelphia"},
+  {date:"Jul 6",time:"07:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 16",venue:"New York/NJ"},
+  {date:"Jul 6",time:"12:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 16",venue:"Mexico City"},
+  {date:"Jul 7",time:"07:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 16",venue:"Dallas"},
+  {date:"Jul 7",time:"14:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 16",venue:"Seattle"},
+  {date:"Jul 8",time:"03:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 16",venue:"Atlanta"},
+  {date:"Jul 8",time:"10:00",home:"TBD",away:"TBD",group:"-",stage:"Round of 16",venue:"Vancouver"},
+  // QUARTER FINALS
+  {date:"Jul 10",time:"07:00",home:"TBD",away:"TBD",group:"-",stage:"Quarter Final",venue:"Boston"},
+  {date:"Jul 11",time:"09:00",home:"TBD",away:"TBD",group:"-",stage:"Quarter Final",venue:"Los Angeles"},
+  {date:"Jul 12",time:"08:00",home:"TBD",away:"TBD",group:"-",stage:"Quarter Final",venue:"Miami"},
+  {date:"Jul 12",time:"13:00",home:"TBD",away:"TBD",group:"-",stage:"Quarter Final",venue:"Kansas City"},
+  // SEMI FINALS
+  {date:"Jul 15",time:"07:00",home:"TBD",away:"TBD",group:"-",stage:"Semi Final",venue:"Dallas"},
+  {date:"Jul 16",time:"06:00",home:"TBD",away:"TBD",group:"-",stage:"Semi Final",venue:"Atlanta"},
+  // BRONZE + FINAL
+  {date:"Jul 19",time:"08:00",home:"TBD",away:"TBD",group:"-",stage:"Bronze Medal",venue:"Miami"},
+  {date:"Jul 20",time:"06:00",home:"TBD",away:"TBD",group:"-",stage:"Final",venue:"New York/NJ"},
+];
+
+const STAGE_META = {
+  "Group":        {color:"#22c55e",bg:"rgba(34,197,94,0.15)",label:"GS"},
+  "Round of 32":  {color:"#60a5fa",bg:"rgba(96,165,250,0.15)",label:"R32"},
+  "Round of 16":  {color:"#a78bfa",bg:"rgba(167,139,250,0.15)",label:"R16"},
+  "Quarter Final":{color:"#fb923c",bg:"rgba(251,146,60,0.15)",label:"QF"},
+  "Semi Final":   {color:"#f87171",bg:"rgba(248,113,113,0.15)",label:"SF"},
+  "Bronze Medal": {color:"#a8a29e",bg:"rgba(168,162,158,0.15)",label:"3RD"},
+  "Final":        {color:"#fbbf24",bg:"rgba(251,191,36,0.2)",label:"🏆"},
+};
+
+const GROUP_COLORS = {
+  A:"#ef4444",B:"#f97316",C:"#eab308",D:"#84cc16",
+  E:"#22c55e",F:"#14b8a6",G:"#38bdf8",H:"#818cf8",
+  I:"#e879f9",J:"#fb7185",K:"#34d399",L:"#fde68a","-":"#6b7280"
+};
+
+const STAGES_ORDER = ["All","Group","Round of 32","Round of 16","Quarter Final","Semi Final","Final"];
+
+function App() {
+  const [stage, setStage] = useState("All");
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => MATCHES.filter(m => {
+    if (stage !== "All" && m.stage !== stage) return false;
+    if (search) {
+      const s = search.toLowerCase();
+      return m.home.toLowerCase().includes(s) || m.away.toLowerCase().includes(s) || m.venue.toLowerCase().includes(s);
+    }
+    return true;
+  }), [stage, search]);
+
+  const byDate = useMemo(() => {
+    const map = new Map();
+    filtered.forEach(m => {
+      if (!map.has(m.date)) map.set(m.date, []);
+      map.get(m.date).push(m);
+    });
+    return map;
+  }, [filtered]);
+
+  return (
+    <div style={{minHeight:"100vh",background:"#070d09",color:"#e2e8e4",fontFamily:"'Barlow', system-ui, sans-serif",paddingBottom:60}}>
+
+      {/* HEADER */}
+      <div style={{background:"linear-gradient(180deg,#0e2414 0%,#070d09 100%)",borderBottom:"1px solid #1a3320",padding:"32px 20px 24px",textAlign:"center",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(circle at 50% 0%,rgba(34,197,94,0.08) 0%,transparent 70%)"}}/>
+        <div style={{position:"relative"}}>
+          <div style={{fontSize:12,letterSpacing:4,color:"#4ade80",textTransform:"uppercase",marginBottom:8,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600}}>FIFA</div>
+          <h1 style={{margin:0,fontSize:"clamp(32px,8vw,56px)",fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,lineHeight:1,letterSpacing:-1,color:"#fff"}}>WORLD CUP 2026</h1>
+          <div style={{fontSize:"clamp(14px,4vw,20px)",fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,color:"#4ade80",letterSpacing:3,marginTop:6}}>FULL SCHEDULE — AEST</div>
+          <div style={{marginTop:10,fontSize:12,color:"#6b8a72"}}>11 Jun – 19 Jul 2026 · USA, Canada, Mexico · 104 matches · 48 teams · All times AEST (UTC+10)</div>
+        </div>
+      </div>
+
+      <div style={{maxWidth:820,margin:"0 auto",padding:"0 16px"}}>
+
+        {/* STAGE FILTER */}
+        <div style={{marginTop:20,display:"flex",gap:6,flexWrap:"wrap",justifyContent:"center"}}>
+          {STAGES_ORDER.map(s => {
+            const active = stage === s;
+            const meta = s === "All" ? null : STAGE_META[s];
+            return (
+              <button key={s} className="filter-btn" onClick={() => setStage(s)} style={{
+                background: active ? (meta ? meta.color : "#4ade80") : "rgba(255,255,255,0.05)",
+                color: active ? "#000" : (meta ? meta.color : "#9ca3af"),
+                border:`1px solid ${active ? "transparent" : (meta ? meta.color+"40" : "#2d3a30")}`,
+                borderRadius:20,padding:"5px 14px",fontSize:11,
+                fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,letterSpacing:1,textTransform:"uppercase",cursor:"pointer"
+              }}>
+                {s === "All" ? `ALL (${MATCHES.length})` : s}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* SEARCH */}
+        <div style={{marginTop:14,position:"relative"}}>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search team or city…"
+            style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid #1f3323",borderRadius:8,padding:"10px 16px 10px 38px",fontSize:13,fontFamily:"'Barlow',sans-serif"}}/>
+          <span style={{position:"absolute",left:13,top:"50%",transform:"translateY(-50%)",color:"#4a6a50",fontSize:15}}>⚽</span>
+          {search && <span onClick={() => setSearch("")} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",color:"#6b7280",cursor:"pointer",fontSize:18,lineHeight:1}}>×</span>}
+        </div>
+
+        <div style={{marginTop:8,fontSize:11,color:"#4a6a50",textAlign:"right"}}>{filtered.length} matches shown</div>
+
+        {/* DAY SECTIONS */}
+        {[...byDate.entries()].map(([date, games]) => {
+          const isKnockout = games.some(g => g.stage !== "Group");
+          return (
+            <div key={date} style={{marginTop:24}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+                <div style={{
+                  background: isKnockout ? "rgba(251,191,36,0.1)" : "rgba(34,197,94,0.1)",
+                  border:`1px solid ${isKnockout ? "#fbbf2440" : "#22c55e40"}`,
+                  borderRadius:6,padding:"4px 12px",
+                  fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,
+                  fontSize:14,letterSpacing:1,color: isKnockout ? "#fbbf24" : "#4ade80"
+                }}>{date}</div>
+                <div style={{flex:1,height:1,background:"#1a2e1e"}}/>
+                <span style={{fontSize:11,color:"#374a3a"}}>{games.length} game{games.length>1?"s":""}</span>
+              </div>
+
+              <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                {games.sort((a,b) => a.time.localeCompare(b.time)).map((m,i) => {
+                  const meta = STAGE_META[m.stage];
+                  const gc = GROUP_COLORS[m.group];
+                  const isAus = m.home.includes("Australia") || m.away.includes("Australia");
+                  const isArg = m.home.includes("Argentina") || m.away.includes("Argentina");
+                  const isSpecial = isAus || isArg;
+                  return (
+                    <div key={i} className="match-card" style={{
+                      background: isSpecial ? "linear-gradient(135deg,rgba(34,197,94,0.08) 0%,rgba(255,255,255,0.03) 100%)" : "rgba(255,255,255,0.03)",
+                      border:`1px solid ${isSpecial ? "#22c55e30" : "#1a2e1e"}`,
+                      borderLeft:`3px solid ${meta.color}`,
+                      borderRadius:8,padding:"10px 14px",
+                      display:"flex",alignItems:"center",gap:10
+                    }}>
+                      <div style={{minWidth:48,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:16,color:"#e2e8e4",letterSpacing:0.5}}>{m.time}</div>
+                      <div style={{background:meta.bg,color:meta.color,border:`1px solid ${meta.color}50`,borderRadius:4,padding:"2px 6px",fontSize:9,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:1,minWidth:30,textAlign:"center"}}>{meta.label}</div>
+                      {m.group !== "-" && (
+                        <div style={{background:`${gc}18`,color:gc,border:`1px solid ${gc}40`,borderRadius:4,padding:"2px 6px",fontSize:9,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,minWidth:24,textAlign:"center"}}>{m.group}</div>
+                      )}
+                      <div style={{flex:1,display:"flex",alignItems:"center",gap:6,minWidth:0,overflow:"hidden"}}>
+                        <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:14,color:m.home==="TBD"?"#4a6a50":"#e2e8e4",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{m.home}</span>
+                        <span style={{color:"#2d4a32",fontSize:11,fontWeight:700,flexShrink:0}}>vs</span>
+                        <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:14,color:m.away==="TBD"?"#4a6a50":"#e2e8e4",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{m.away}</span>
+                      </div>
+                      <div style={{fontSize:10,color:"#4a6a50",whiteSpace:"nowrap",flexShrink:0}}>📍{m.venue}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+
+        {byDate.size === 0 && (
+          <div style={{textAlign:"center",marginTop:60,color:"#4a6a50"}}>
+            <div style={{fontSize:40}}>⚽</div>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:20,marginTop:8}}>No matches found</div>
+          </div>
+        )}
+
+        <div style={{marginTop:40,textAlign:"center",color:"#2d4a32",fontSize:10}}>
+          All times AEST (UTC+10) · Sources: Al Jazeera / FIFA · Some TBDs to be confirmed
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
